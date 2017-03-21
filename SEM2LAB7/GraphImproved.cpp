@@ -14,6 +14,11 @@
 
 #define IDR_MENU 101
 #define ID_SETTINGS_GRAPHSETTINGS 40001
+#define IDD_GRAPHDIALOG 102
+#define IDB_GRAPHAPPLY 1003
+#define IDB_GRAPHCANCEL 1004
+#define IDE_GRAPHEA 1001
+#define IDE_GRAPHEB 1002
 
 #include <windows.h>
 #include  <math.h>
@@ -89,6 +94,88 @@ BOOL InitApplication(HINSTANCE hinstance)
 	}
 	return TRUE;
 }
+
+BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+{
+	string text;
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		text = "a = " + to_string(dAInfo.a);
+		SetDlgItemText(hwnd, IDE_GRAPHEA, text.data());
+		text = "b = " + to_string(dAInfo.b);
+		SetDlgItemText(hwnd, IDE_GRAPHEB, text.data());
+	case WM_COMMAND:
+	{
+		switch (LOWORD(wparam))
+		{
+		case IDB_GRAPHAPPLY:
+			break;
+		case IDB_GRAPHCANCEL:
+			EndDialog(hwnd, 0);
+			break;
+		case IDE_GRAPHEA:
+			switch (HIWORD(wparam))
+			{
+			case EN_SETFOCUS:
+			{
+				SetDlgItemText(hwnd, IDE_GRAPHEA, "");
+				break;
+			}
+			case EN_KILLFOCUS:
+			{
+				char buffer[5];
+				GetDlgItemText(hwnd, IDE_GRAPHEA, buffer, 4);
+				if (atoi(buffer))
+				{
+					dAInfo.a = atoi(buffer);
+					text = "a = " + to_string(dAInfo.a);
+					SetDlgItemText(hwnd, IDE_GRAPHEA, text.data());
+				}
+				else
+				{
+					MessageBox(hwnd, "Error", "Not a number", MB_OK);
+					text = "a = " + to_string(dAInfo.a);
+					SetDlgItemText(hwnd, IDE_GRAPHEA, text.data());
+				}
+			}
+			}
+			break;
+		case IDE_GRAPHEB:
+			switch(HIWORD(wparam))
+			{
+			case EN_SETFOCUS:
+			{
+				SetDlgItemText(hwnd, IDE_GRAPHEB, "");
+				break;
+			}
+			case EN_KILLFOCUS:
+			{
+				char buffer[5];
+				GetDlgItemText(hwnd, IDE_GRAPHEB, buffer, 4);
+				if (atoi(buffer))
+				{
+					dAInfo.b = atoi(buffer);
+					text = "b = " + to_string(dAInfo.b);
+					SetDlgItemText(hwnd, IDE_GRAPHEB, text.data());
+				}
+				else
+				{
+					MessageBox(hwnd, "Error", "Not a number", MB_OK);
+					text = "b = " + to_string(dAInfo.b);
+					SetDlgItemText(hwnd, IDE_GRAPHEB, text.data());
+				}
+			}
+				break;
+			}
+			break;
+		}
+		break;
+	}
+	}
+	return FALSE;
+}
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	static int x, y, a, b;
@@ -111,7 +198,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		y = client.bottom;
 
 		dAInfo = GetAreaInfo(x, y, a, b);
-		
+
 		break;
 	case WM_SIZE:
 		GetClientRect(hwnd, &client);
@@ -122,10 +209,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 	case WM_COMMAND:
 	{
-		switch(wparam)
+		switch (wparam)
 		{
 		case ID_SETTINGS_GRAPHSETTINGS:
-			DialogBox(GetModuleHandle(NULL),)
+			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_GRAPHDIALOG), hwnd, GraphBoxHandler);
 			break;
 		}
 		break;
@@ -212,7 +299,7 @@ POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld)
 
 DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb)
 {
-	int xPoints, yPoints, divValueX, divValueY,a,b; // Кол-во делений
+	int xPoints, yPoints, divValueX, divValueY, a, b; // Кол-во делений
 
 	xPoints = abs(bb - aa); yPoints = xPoints / 2;
 	divValueX = x / (xPoints * 2);
@@ -224,7 +311,7 @@ DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb)
 	di.divValueX = divValueX; di.divValueY = divValueY; di.newX = newX; di.newY = newY; di.xPoints = xPoints; di.yPoints = yPoints;
 	return di;
 }
-void Draw(HDC& hdc, int x, int y,  int ID)
+void Draw(HDC& hdc, int x, int y, int ID)
 {
 	HPEN newPen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
 	HPEN oldPen = (HPEN)SelectObject(hdc, newPen);
