@@ -33,7 +33,7 @@ template <typename T> int sgn(T val) {
 
 struct DrawAreaInfo
 {
-	int xPoints, yPoints, divValueX, divValueY, newX, newY, a, b;
+	double xPoints, yPoints, divValueX, divValueY, newX, newY, a, b;
 };
 static DrawAreaInfo dAInfo;
 
@@ -53,6 +53,7 @@ POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld);
 double GetDistance(int x1, int y1, int x2, int y2);
 double CALLFUNC(int id, double x);
 double GetFuncMax(int ID);
+double GetFuncMin(int ID);
 
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE prevHinstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -121,6 +122,7 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 		switch (LOWORD(wparam))
 		{
 		case IDB_GRAPHAPPLY:
+			if (tempFrontiers.first >= tempFrontiers.second || tempFrontiers.first >= dAInfo.b) EndDialog(hwnd , 0);
 			if (tempFrontiers.first != MAXINT32)
 				dAInfo.a = tempFrontiers.first;
 			if (tempFrontiers.second != MAXINT32)
@@ -209,15 +211,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	{
 	case WM_CREATE:
 		gr.a = 1; gr.b = 1; gr.c = 1;
-		funcID = CUSTOM_ID;
+		funcID = XSINX_ID;
 		a = -5; b = 5;
-		GetClientRect(hwnd, &client);
-		x = client.right;
-		y = client.bottom;
-
-		GetAreaInfo(x, y, a, b, funcID);
-
-		break;
+		dAInfo.a = a;
+		dAInfo.b = b;
 	case WM_SIZE:
 		GetClientRect(hwnd, &client);
 		x = client.right;
@@ -330,11 +327,12 @@ DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb, int ID)
 
 	divValueX = x / (xPoints * 2);
 	dAInfo.divValueX = divValueX;
-	yPoints = GetFuncMax(ID);//max;
-	
+	double min = ceil(abs(GetFuncMin(ID))), max = ceil(abs(GetFuncMax(ID)));
+	yPoints = (max > min) ? max : min;//max;
+
 	divValueY = y / (yPoints * 2);
 	int newX, newY; newX = x / 2; newY = y / 2;
-	
+
 	dAInfo.divValueY = divValueY; dAInfo.newX = newX; dAInfo.newY = newY; dAInfo.xPoints = xPoints; dAInfo.yPoints = yPoints;
 	return dAInfo;
 }
@@ -426,6 +424,17 @@ double GetFuncMax(int ID)
 	return max;
 }
 
+double GetFuncMin(int ID)
+{
+	double min = MAXINT32;
+	double fx = 0;
+	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
+	{
+		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
+		if (fx < min) min = fx;
+	}
+	return min;
+}
 bool isNumber(char* str, int len)
 {
 	if (len > 0)
