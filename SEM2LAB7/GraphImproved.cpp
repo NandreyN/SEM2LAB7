@@ -4,7 +4,7 @@
 #define LN(x) log(x)
 #define SQRT(x) sqrt(x)
 #define XSINX(x) (double)x*sin(x)
-#define CUSTOM(x) (double)1/x
+#define CUSTOM(x) (double)x*x
 
 #define EXP_ID 0
 #define LN_ID 1
@@ -27,6 +27,10 @@
 #include <limits>
 using namespace std;
 
+template <typename T> int sgn(T val) {
+	return (T(0) < val) - (val < T(0));
+}
+
 struct DrawAreaInfo
 {
 	int xPoints, yPoints, divValueX, divValueY, newX, newY, a, b;
@@ -43,11 +47,12 @@ bool isNumber(char* str, int len);
 BOOL InitApplication(HINSTANCE hinstance);
 BOOL InitInstance(HINSTANCE hinstance, int nCmdShow);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-DrawAreaInfo GetAreaInfo(int x, int y, int a, int b);
+DrawAreaInfo GetAreaInfo(int x, int y, int a, int b, int ID);
 void Draw(HDC& hdc, int x, int y, int funcID);
 POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld);
 double GetDistance(int x1, int y1, int x2, int y2);
 double CALLFUNC(int id, double x);
+double GetFuncMax(int ID);
 
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE prevHinstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -204,20 +209,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	{
 	case WM_CREATE:
 		gr.a = 1; gr.b = 1; gr.c = 1;
-		funcID = XSINX_ID;
-		a = -5; b = 8;
+		funcID = CUSTOM_ID;
+		a = -5; b = 5;
 		GetClientRect(hwnd, &client);
 		x = client.right;
 		y = client.bottom;
 
-		dAInfo = GetAreaInfo(x, y, a, b);
+		GetAreaInfo(x, y, a, b, funcID);
 
 		break;
 	case WM_SIZE:
 		GetClientRect(hwnd, &client);
 		x = client.right;
 		y = client.bottom;
-		dAInfo = GetAreaInfo(x, y, dAInfo.a, dAInfo.b);
+		GetAreaInfo(x, y, dAInfo.a, dAInfo.b, funcID);
 		break;
 
 	case WM_COMMAND:
@@ -232,6 +237,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	}
 	case WM_PAINT:
 	{
+		GetAreaInfo(x, y, dAInfo.a, dAInfo.b, funcID);
 		RECT Rect; GetClientRect(hwnd, &Rect);
 
 		hdc = BeginPaint(hwnd, &ps);
@@ -247,7 +253,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 	case WM_LBUTTONDOWN:
 	{
-		DrawAreaInfo di = GetAreaInfo(x, y, a, b);
+		DrawAreaInfo di = GetAreaInfo(x, y, a, b, funcID);
 		int cx = LOWORD(lparam);
 		int cy = HIWORD(lparam);
 		POINT clickedCoord = ConvertCoordinates(cx, cy, x, y);
@@ -310,19 +316,27 @@ POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld)
 	return pt;
 }
 
-DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb)
+DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb, int ID)
 {
-	int xPoints, yPoints, divValueX, divValueY, a, b; // Кол-во делений
-
-	xPoints = abs(bb - aa); yPoints = xPoints / 2;
-	divValueX = x / (xPoints * 2);
-	divValueY = y / (yPoints * 2);
-	int newX, newY; newX = x / 2; newY = y / 2;
 	DrawAreaInfo di;
 
-	di.a = aa; di.b = bb;
-	di.divValueX = divValueX; di.divValueY = divValueY; di.newX = newX; di.newY = newY; di.xPoints = xPoints; di.yPoints = yPoints;
-	return di;
+	dAInfo.a = aa; dAInfo.b = bb;
+	int xPoints, yPoints, divValueX, divValueY, a, b; // Кол-во делений
+
+	if (sgn(aa) != sgn(bb))
+		xPoints = abs(bb - aa);
+	else
+		xPoints = (abs(bb) > abs(aa)) ? bb + 3 : aa + 3;
+
+	divValueX = x / (xPoints * 2);
+	dAInfo.divValueX = divValueX;
+	yPoints = GetFuncMax(ID);//max;
+	
+	divValueY = y / (yPoints * 2);
+	int newX, newY; newX = x / 2; newY = y / 2;
+	
+	dAInfo.divValueY = divValueY; dAInfo.newX = newX; dAInfo.newY = newY; dAInfo.xPoints = xPoints; dAInfo.yPoints = yPoints;
+	return dAInfo;
 }
 void Draw(HDC& hdc, int x, int y, int ID)
 {
@@ -399,6 +413,19 @@ double CALLFUNC(int id, double x)
 	default: return 0.0;
 	}
 }
+
+double GetFuncMax(int ID)
+{
+	double max = MININT32;
+	double fx = 0;
+	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
+	{
+		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
+		if (fx > max) max = fx;
+	}
+	return max;
+}
+
 bool isNumber(char* str, int len)
 {
 	if (len > 0)
