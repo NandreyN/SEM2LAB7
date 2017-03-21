@@ -24,6 +24,7 @@
 #include  <math.h>
 #include <cmath>
 #include <string>
+#include <limits>
 using namespace std;
 
 struct DrawAreaInfo
@@ -38,6 +39,7 @@ struct Graph
 	int b;
 	int c;
 };
+bool isNumber(char* str, int len);
 BOOL InitApplication(HINSTANCE hinstance);
 BOOL InitInstance(HINSTANCE hinstance, int nCmdShow);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
@@ -98,18 +100,29 @@ BOOL InitApplication(HINSTANCE hinstance)
 BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	string text;
+	static pair<int, int> tempFrontiers;
+
 	switch (message)
 	{
 	case WM_INITDIALOG:
+		tempFrontiers.first = tempFrontiers.second = MAXINT32;
 		text = "a = " + to_string(dAInfo.a);
 		SetDlgItemText(hwnd, IDE_GRAPHEA, text.data());
 		text = "b = " + to_string(dAInfo.b);
 		SetDlgItemText(hwnd, IDE_GRAPHEB, text.data());
+		break;
 	case WM_COMMAND:
 	{
 		switch (LOWORD(wparam))
 		{
 		case IDB_GRAPHAPPLY:
+			if (tempFrontiers.first != MAXINT32)
+				dAInfo.a = tempFrontiers.first;
+			if (tempFrontiers.second != MAXINT32)
+				dAInfo.b = tempFrontiers.second;
+
+			InvalidateRect(GetParent(hwnd), NULL, true);
+			EndDialog(hwnd, 0);
 			break;
 		case IDB_GRAPHCANCEL:
 			EndDialog(hwnd, 0);
@@ -126,10 +139,10 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 			{
 				char buffer[5];
 				GetDlgItemText(hwnd, IDE_GRAPHEA, buffer, 4);
-				if (atoi(buffer))
+				if (isNumber(buffer, strlen(buffer)))
 				{
-					dAInfo.a = atoi(buffer);
-					text = "a = " + to_string(dAInfo.a);
+					tempFrontiers.first = atoi(buffer);
+					text = "a = " + to_string(tempFrontiers.first);
 					SetDlgItemText(hwnd, IDE_GRAPHEA, text.data());
 				}
 				else
@@ -142,7 +155,7 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 			}
 			break;
 		case IDE_GRAPHEB:
-			switch(HIWORD(wparam))
+			switch (HIWORD(wparam))
 			{
 			case EN_SETFOCUS:
 			{
@@ -153,10 +166,10 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 			{
 				char buffer[5];
 				GetDlgItemText(hwnd, IDE_GRAPHEB, buffer, 4);
-				if (atoi(buffer))
+				if (isNumber(buffer, strlen(buffer)))
 				{
-					dAInfo.b = atoi(buffer);
-					text = "b = " + to_string(dAInfo.b);
+					tempFrontiers.second = atoi(buffer);
+					text = "b = " + to_string(tempFrontiers.second);
 					SetDlgItemText(hwnd, IDE_GRAPHEB, text.data());
 				}
 				else
@@ -166,7 +179,7 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 					SetDlgItemText(hwnd, IDE_GRAPHEB, text.data());
 				}
 			}
-				break;
+			break;
 			}
 			break;
 		}
@@ -385,4 +398,16 @@ double CALLFUNC(int id, double x)
 		return CUSTOM(x);
 	default: return 0.0;
 	}
+}
+bool isNumber(char* str, int len)
+{
+	if (len > 0)
+		if (str[0] == '-' || str[0] == '+' || isdigit(str[0])); else return false;
+	if (len > 1)
+	{
+		for (int i = 1; i < len; i++)
+			if (!isdigit(str[i])) return false;
+		return true;
+	}
+	return true;
 }
