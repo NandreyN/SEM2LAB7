@@ -467,7 +467,6 @@ DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb, int ID)
 		divValueY = y / (yPoints * 2);
 	}
 
-
 	int newX, newY; newX = x / 2; newY = y / 2;
 
 	dAInfo.divValueY = divValueY; dAInfo.newX = newX; dAInfo.newY = newY; dAInfo.xPoints = xPoints; dAInfo.yPoints = yPoints;
