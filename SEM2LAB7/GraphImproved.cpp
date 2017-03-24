@@ -6,25 +6,35 @@
 #define XSINX(x) (double)x*sin(x)
 #define CUSTOM(x) (double)x*x
 
-#define EXP_ID 0
-#define LN_ID 1
-#define SQRT_ID 2
-#define XSINX_ID 3
-#define CUSTOM_ID 4
+#define EXP_ID 1005
+#define LN_ID 1006
+#define SQRT_ID 1007
+#define XSINX_ID 1008
+#define CUSTOM_ID 1009
 
 #define IDR_MENU 101
+#define IDR_CONTEXTMENU 106
+#define IDD_WIDTHDIALOG 108
 #define ID_SETTINGS_GRAPHSETTINGS 40001
+#define ID_SETTINGS_SETCOLOR 40002
 #define IDD_GRAPHDIALOG 102
 #define IDB_GRAPHAPPLY 1003
 #define IDB_GRAPHCANCEL 1004
 #define IDE_GRAPHEA 1001
 #define IDE_GRAPHEB 1002
+#define IDE_CUSTOMEDIT 1010
+#define ID_WIDTHSLIDER 1011
+#define ID_EXIT 1020
+#define ID_WIDTH 1021
 
 #include <windows.h>
 #include  <math.h>
 #include <cmath>
 #include <string>
 #include <limits>
+#include "Notation.h"
+#include <Commctrl.h>
+
 using namespace std;
 
 template <typename T> int sgn(T val) {
@@ -33,9 +43,14 @@ template <typename T> int sgn(T val) {
 
 struct DrawAreaInfo
 {
-	double xPoints, yPoints, divValueX, divValueY, newX, newY, a, b;
+	double xPoints, yPoints, divValueX, divValueY, newX, newY, a, b, factorX, factorY;
 };
+
+static int globalGraphWidth = 1;
+static COLORREF globalGraphColor;
 static DrawAreaInfo dAInfo;
+static int funcID;
+
 
 struct Graph
 {
@@ -89,7 +104,7 @@ BOOL InitApplication(HINSTANCE hinstance)
 	wndclass.cbWndExtra = 0;
 	wndclass.hInstance = hinstance;
 	wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wndclass.hCursor = LoadCursor(NULL, IDC_CROSS);
+	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wndclass.lpszMenuName = MAKEINTRESOURCE(IDR_MENU);
 	wndclass.lpszClassName = "Graph";
@@ -103,6 +118,30 @@ BOOL InitApplication(HINSTANCE hinstance)
 	return TRUE;
 }
 
+BOOL CALLBACK WidthBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+{
+	static HWND slider;
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		slider = GetDlgItem(hwnd, ID_WIDTHSLIDER);
+		SendMessage(slider, TBM_SETRANGE, (WPARAM)FALSE, (LPARAM)MAKELONG(1, 3));
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wparam))
+		{
+		case IDOK:
+			int val = SendMessage(slider, TBM_GETPOS, NULL, NULL);
+			globalGraphWidth = val;
+			InvalidateRect(GetParent(hwnd), NULL, true);
+			EndDialog(hwnd, 0);
+			break;
+		}
+		break;
+	}
+	return FALSE;
+}
+
 BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	string text;
@@ -111,18 +150,20 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 	switch (message)
 	{
 	case WM_INITDIALOG:
+		CheckRadioButton(hwnd, EXP_ID, CUSTOM_ID, funcID);
 		tempFrontiers.first = tempFrontiers.second = MAXINT32;
 		text = "a = " + to_string(dAInfo.a);
 		SetDlgItemText(hwnd, IDE_GRAPHEA, text.data());
 		text = "b = " + to_string(dAInfo.b);
 		SetDlgItemText(hwnd, IDE_GRAPHEB, text.data());
+		SetDlgItemText(hwnd, IDE_CUSTOMEDIT, "f(x)=");
 		break;
 	case WM_COMMAND:
 	{
 		switch (LOWORD(wparam))
 		{
 		case IDB_GRAPHAPPLY:
-			if (tempFrontiers.first >= tempFrontiers.second || tempFrontiers.first >= dAInfo.b) EndDialog(hwnd , 0);
+			if (tempFrontiers.first >= tempFrontiers.second || tempFrontiers.first >= dAInfo.b) EndDialog(hwnd, 0);
 			if (tempFrontiers.first != MAXINT32)
 				dAInfo.a = tempFrontiers.first;
 			if (tempFrontiers.second != MAXINT32)
@@ -189,8 +230,27 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 			break;
 			}
 			break;
+
+		case EXP_ID:
+			funcID = EXP_ID;
+			break;
+		case LN_ID:
+			funcID = LN_ID;
+			break;
+		case SQRT_ID:
+			funcID = SQRT_ID;
+			break;
+		case XSINX_ID:
+			funcID = XSINX_ID;
+			break;
+		case CUSTOM_ID:
+			funcID = CUSTOM_ID;
+			// to get text from text edit 
+			break;
+			// handle custom
+
+			break;
 		}
-		break;
 	}
 	}
 	return FALSE;
@@ -199,22 +259,26 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	static int x, y, a, b;
+	static HMENU popUp;
+
 	static HDC hdc, buffer;
 	RECT client;
 
 	PAINTSTRUCT ps;
-	static int funcID;
 
 	RECT clientRect;
 	static Graph gr;
+	stack<double> p;
 	switch (message)
 	{
 	case WM_CREATE:
+		// p = GetNotation("(x+8*x)");
 		gr.a = 1; gr.b = 1; gr.c = 1;
-		funcID = XSINX_ID;
+		funcID = EXP_ID;
 		a = -5; b = 5;
 		dAInfo.a = a;
 		dAInfo.b = b;
+
 	case WM_SIZE:
 		GetClientRect(hwnd, &client);
 		x = client.right;
@@ -226,8 +290,37 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	{
 		switch (wparam)
 		{
+		case ID_WIDTH:
+			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_WIDTHDIALOG), hwnd, WidthBoxHandler);
+			break;
+		case ID_EXIT:
+			int res; res = MessageBox(NULL, "Do you really want to exit?", "Message", MB_OKCANCEL);
+			switch (res)
+			{
+			case IDOK:
+				SendMessage(hwnd, WM_CLOSE, NULL, NULL);
+			default:
+				break;
+			}
+			break;
 		case ID_SETTINGS_GRAPHSETTINGS:
 			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_GRAPHDIALOG), hwnd, GraphBoxHandler);
+			break;
+		case ID_SETTINGS_SETCOLOR:
+			CHOOSECOLOR ccs;
+			COLORREF acrCustClr[16];
+			ccs.lStructSize = sizeof(CHOOSECOLOR);
+			ccs.hwndOwner = hwnd;
+			ccs.rgbResult = RGB(255, 255, 255);
+			ccs.Flags = CC_RGBINIT | CC_FULLOPEN;
+			ccs.lpCustColors = (LPDWORD)acrCustClr;
+
+			if (ChooseColor(&ccs))
+			{
+				globalGraphColor = ccs.rgbResult;
+				InvalidateRect(hwnd, NULL, true);
+			}
+
 			break;
 		}
 		break;
@@ -235,7 +328,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	case WM_PAINT:
 	{
 		GetAreaInfo(x, y, dAInfo.a, dAInfo.b, funcID);
-		RECT Rect; GetClientRect(hwnd, &Rect);
+		RECT Rect;
+
+		string text = "Scale X : " + to_string(dAInfo.factorX) + " , Y : " + to_string(dAInfo.factorY);
 
 		hdc = BeginPaint(hwnd, &ps);
 		SetMapMode(hdc, MM_ANISOTROPIC);
@@ -243,7 +338,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		SetViewportExtEx(hdc, x, -y, NULL);
 		SetViewportOrgEx(hdc, x / 2, y / 2, NULL);
 
+		SetRect(&Rect, -x / 2, y / 2, -x / 2 + 0.3*x, y / 2 - 0.1*y);
 		Draw(hdc, x, y, funcID);
+		DrawText(hdc, text.data(), text.size(), &Rect, DT_SINGLELINE | DT_LEFT);
 		EndPaint(hwnd, &ps);
 		break;
 	}
@@ -269,6 +366,26 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		}
 		break;
 	}
+	case WM_RBUTTONUP:
+		POINT pt;
+		pt.x = LOWORD(lparam);
+		pt.y = HIWORD(lparam);
+		ClientToScreen(hwnd, &pt);
+
+		HMENU hMenu; hMenu = CreatePopupMenu();
+
+		AppendMenu(hMenu, MFT_STRING, ID_WIDTH, "&Width");
+		AppendMenu(hMenu, MFT_SEPARATOR, 0, NULL);
+		AppendMenu(hMenu, MFT_STRING, ID_EXIT, "&Exit");
+
+		TrackPopupMenu(hMenu, TPM_RIGHTBUTTON |
+			TPM_TOPALIGN |
+			TPM_LEFTALIGN,
+			pt.x,
+			pt.y, 0, hwnd, NULL);
+		DestroyMenu(hMenu);
+
+		break;
 
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
@@ -315,10 +432,11 @@ POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld)
 
 DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb, int ID)
 {
+	if (!x || !y) return DrawAreaInfo();
 	DrawAreaInfo di;
 
 	dAInfo.a = aa; dAInfo.b = bb;
-	int xPoints, yPoints, divValueX, divValueY, a, b; // Кол-во делений
+	int xPoints, yPoints, divValueX, divValueY, a, b, factorX = 1, factorY = 1; // Кол-во делений
 
 	if (sgn(aa) != sgn(bb))
 		xPoints = abs(bb - aa);
@@ -326,14 +444,34 @@ DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb, int ID)
 		xPoints = (abs(bb) > abs(aa)) ? bb + 3 : aa + 3;
 
 	divValueX = x / (xPoints * 2);
+	while (divValueX <= globalGraphWidth * 3)
+	{
+		xPoints /= 2;
+		factorX++;
+		divValueX = x / (xPoints * 2);
+	}
+
 	dAInfo.divValueX = divValueX;
 	double min = ceil(abs(GetFuncMin(ID))), max = ceil(abs(GetFuncMax(ID)));
-	yPoints = (max > min) ? max : min;//max;
+
+	if (max != MAXINT32 && min != MININT32)
+		yPoints = (max > min) ? max : min;//max;
+	else
+		yPoints = xPoints * 2;
 
 	divValueY = y / (yPoints * 2);
+	while (divValueY <= globalGraphWidth * 3)
+	{
+		yPoints /= 2;
+		factorY++;
+		divValueY = y / (yPoints * 2);
+	}
+
+
 	int newX, newY; newX = x / 2; newY = y / 2;
 
 	dAInfo.divValueY = divValueY; dAInfo.newX = newX; dAInfo.newY = newY; dAInfo.xPoints = xPoints; dAInfo.yPoints = yPoints;
+	dAInfo.factorX = factorX; dAInfo.factorY = factorY;
 	return dAInfo;
 }
 void Draw(HDC& hdc, int x, int y, int ID)
@@ -365,18 +503,25 @@ void Draw(HDC& hdc, int x, int y, int ID)
 		MoveToEx(hdc, 5, -yy, NULL);
 		LineTo(hdc, -5, -yy);
 	}
-	MoveToEx(hdc, dAInfo.a, 0, NULL);
+	//MoveToEx(hdc, dAInfo.a, 0, NULL);
 
 	double fx = CALLFUNC(ID, dAInfo.a * dAInfo.divValueX);
 
-	MoveToEx(hdc, dAInfo.a * dAInfo.divValueX, fx * dAInfo.divValueY, NULL);
+	if (fx == fx)
+		MoveToEx(hdc, dAInfo.a * dAInfo.divValueX, fx * dAInfo.divValueY, NULL);
 
+	newPen = CreatePen(PS_SOLID, globalGraphWidth, globalGraphColor);
+	oldPen = (HPEN)SelectObject(hdc, newPen);
 	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
 	{
 		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
 		if (fx == fx)
-			SetPixel(hdc, xArg, fx * dAInfo.divValueY, RGB(0, 0, 0));
+			//LineTo(hdc, xArg, fx * dAInfo.divValueY);
+			Ellipse(hdc, xArg - globalGraphWidth, fx * dAInfo.divValueY - globalGraphWidth, xArg + globalGraphWidth, fx * dAInfo.divValueY + globalGraphWidth);
+		//SetPixel(hdc, xArg, fx * dAInfo.divValueY, RGB(0, 0, 0));
 	}
+	SelectObject(hdc, oldPen);
+	DeleteObject(newPen);
 
 	newPen = CreatePen(PS_DOT, 1, BLACK_PEN);
 	oldPen = (HPEN)SelectObject(hdc, newPen);
@@ -420,6 +565,7 @@ double GetFuncMax(int ID)
 	{
 		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
 		if (fx > max) max = fx;
+		if (fx >= 0.95 * MAXINT32) return MAXINT32;
 	}
 	return max;
 }
@@ -432,6 +578,7 @@ double GetFuncMin(int ID)
 	{
 		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
 		if (fx < min) min = fx;
+		if (fx <= MININT32) return MININT32;
 	}
 	return min;
 }
