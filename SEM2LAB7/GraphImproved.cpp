@@ -16,7 +16,7 @@
 #define IDR_MENU 101
 #define IDR_CONTEXTMENU 106
 #define IDD_WIDTHDIALOG 108
-#define IDD_ABOUT 119
+#define IDD_ABOUT 112
 #define ID_SETTINGS_GRAPHSETTINGS 40001
 #define ID_HACCEL 111
 #define ID_SETTINGS_SETCOLOR 40002
@@ -29,7 +29,6 @@
 #define ID_WIDTHSLIDER 1011
 #define ID_EXIT 1020
 #define ID_WIDTH 1021
-
 #include <windows.h>
 #include  <math.h>
 #include <cmath>
@@ -72,7 +71,7 @@ pair<double, double> GetFuncMinMax(int ID);
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE prevHinstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	MSG msg;
-	
+
 
 	if (!InitApplication(hinstance))
 	{
@@ -146,12 +145,12 @@ BOOL CALLBACK WidthBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 
 BOOL CALLBACK AboutHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
-	switch(message)
+	switch (message)
 	{
 	case WM_INITDIALOG:
 		break;
 	case WM_COMMAND:
-		switch(LOWORD(wparam))
+		switch (LOWORD(wparam))
 		{
 		case IDCANCEL:
 			EndDialog(hwnd, 0);
@@ -285,7 +284,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 	PAINTSTRUCT ps;
 	static Graph gr;
-	
+
 	switch (message)
 	{
 	case WM_CREATE:
@@ -461,6 +460,7 @@ DrawAreaInfo GetAreaInfo(double x, double y, int aa, int bb, int ID)
 	else
 		xPoints = (abs(bb) > abs(aa)) ? bb + 3 : aa + 3;
 
+	if (dAInfo.a > dAInfo.b) swap(dAInfo.a, dAInfo.b);
 	divValueX = x / (xPoints * 2);
 	while (divValueX <= globalGraphWidth * 3)
 	{
@@ -580,7 +580,7 @@ pair<double, double> GetFuncMinMax(int ID)
 {
 	pair<double, double> toReturn;
 	toReturn.second = MININT32;
-	toReturn.first = MAXINT32; 
+	toReturn.first = MAXINT32;
 	double fx;
 
 	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
