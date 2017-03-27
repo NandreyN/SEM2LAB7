@@ -13,23 +13,521 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{6b4cd797-9bb4-424f-9d61-aecee78e62ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN">
+      <UniqueIdentifier>{f89b98a0-05b1-43f5-80e7-c59153d1f4a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\bin">
+      <UniqueIdentifier>{c0bb6449-ed63-40be-afd0-643b3ff4fb6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\test">
+      <UniqueIdentifier>{cccf71cb-7988-482a-8c30-d0e48e5c9845}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN\nodes">
+      <UniqueIdentifier>{bc49e1cd-cda2-4824-bd25-1bd3c113bdb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN\parsers">
+      <UniqueIdentifier>{e73d6df4-d4f2-4119-bbb7-7ed2ba859062}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN\nodes\brackets">
+      <UniqueIdentifier>{eb5bf17b-e75d-4e50-b00c-403ac30aed18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN\nodes\functions">
+      <UniqueIdentifier>{6ffcec41-f82c-4a57-945e-45fb42c109e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN\nodes\operators">
+      <UniqueIdentifier>{6e5dfaed-047e-4a96-ace7-8187af1af9e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN\nodes\values">
+      <UniqueIdentifier>{9584cb76-c8e1-4b25-b294-222b90f3060b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN\nodes\functions\exponentials">
+      <UniqueIdentifier>{e6d1f493-2124-44dc-88ab-02813fffbb9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN\nodes\functions\hyperbolics">
+      <UniqueIdentifier>{b35ac17b-b0b1-40f8-9a81-a88d57aa6401}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\RPN\nodes\functions\trigonometry">
+      <UniqueIdentifier>{6606a23e-c932-467f-b3fe-056c9dd72a7c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GraphImproved.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Notation.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
+    <ClCompile Include="src\test\expressions.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test\helper.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test\hyperbolics.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test\main.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test\ooo.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test\ops.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test\trig.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test\val.cpp">
+      <Filter>src\test</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bin\calc.cpp">
+      <Filter>src\bin</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\context.cpp">
+      <Filter>src\RPN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\core.cpp">
+      <Filter>src\RPN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\exception.cpp">
+      <Filter>src\RPN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\expression.cpp">
+      <Filter>src\RPN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\node.cpp">
+      <Filter>src\RPN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\parser.cpp">
+      <Filter>src\RPN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\tokens.cpp">
+      <Filter>src\RPN</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\parsers\infix.cpp">
+      <Filter>src\RPN\parsers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\parsers\postfix.cpp">
+      <Filter>src\RPN\parsers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\bracket.cpp">
+      <Filter>src\RPN\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\comma.cpp">
+      <Filter>src\RPN\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\expression.cpp">
+      <Filter>src\RPN\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\function.cpp">
+      <Filter>src\RPN\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\operator.cpp">
+      <Filter>src\RPN\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\value.cpp">
+      <Filter>src\RPN\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\brackets\left.cpp">
+      <Filter>src\RPN\nodes\brackets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\brackets\right.cpp">
+      <Filter>src\RPN\nodes\brackets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\values\argument.cpp">
+      <Filter>src\RPN\nodes\values</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\values\constant.cpp">
+      <Filter>src\RPN\nodes\values</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\values\variable.cpp">
+      <Filter>src\RPN\nodes\values</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\operators\addition.cpp">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\operators\division.cpp">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\operators\exponentiation.cpp">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\operators\factorial.cpp">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\operators\modulo.cpp">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\operators\multiplication.cpp">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\operators\negation.cpp">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\operators\subtraction.cpp">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\absolutevalue.cpp">
+      <Filter>src\RPN\nodes\functions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\maximum.cpp">
+      <Filter>src\RPN\nodes\functions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\minimum.cpp">
+      <Filter>src\RPN\nodes\functions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\exponentials\binarylogarithm.cpp">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\exponentials\decadiclogarithm.cpp">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\exponentials\exponential.cpp">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\exponentials\logarithm.cpp">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\exponentials\naturallogarithm.cpp">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\exponentials\power.cpp">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\exponentials\root.cpp">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\exponentials\squareroot.cpp">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\arccosecant.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\arccosine.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\arccotangent.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\arcsecant.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\arcsine.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\arctangent.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\cosecant.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\cosine.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\cotangent.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\secant.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\sine.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\hyperbolics\tangent.cpp">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\arccosecant.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\arccosine.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\arccotangent.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\arccotangent2.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\arcsecant.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\arcsine.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\arctangent.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\arctangent2.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\cosecant.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\cosine.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\cotangent.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\secant.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\sine.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RPN\nodes\functions\trigonometry\tangent.cpp">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SEM2LAB7.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="src\RPN\tgen.rb">
+      <Filter>src\RPN</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\test\helper.h">
+      <Filter>src\test</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\context.h">
+      <Filter>src\RPN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\core.h">
+      <Filter>src\RPN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\evaluator.h">
+      <Filter>src\RPN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\exception.h">
+      <Filter>src\RPN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\expression.h">
+      <Filter>src\RPN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\libheader.h">
+      <Filter>src\RPN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\node.h">
+      <Filter>src\RPN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\parser.h">
+      <Filter>src\RPN</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\parsers\all.h">
+      <Filter>src\RPN\parsers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\parsers\infix.h">
+      <Filter>src\RPN\parsers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\parsers\postfix.h">
+      <Filter>src\RPN\parsers</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\all.h">
+      <Filter>src\RPN\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\bracket.h">
+      <Filter>src\RPN\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\comma.h">
+      <Filter>src\RPN\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\expression.h">
+      <Filter>src\RPN\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\function.h">
+      <Filter>src\RPN\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\inheritable.h">
+      <Filter>src\RPN\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operator.h">
+      <Filter>src\RPN\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\value.h">
+      <Filter>src\RPN\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\brackets\all.h">
+      <Filter>src\RPN\nodes\brackets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\brackets\allnodes.h">
+      <Filter>src\RPN\nodes\brackets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\brackets\left.h">
+      <Filter>src\RPN\nodes\brackets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\brackets\right.h">
+      <Filter>src\RPN\nodes\brackets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\values\all.h">
+      <Filter>src\RPN\nodes\values</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\values\argument.h">
+      <Filter>src\RPN\nodes\values</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\values\constant.h">
+      <Filter>src\RPN\nodes\values</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\values\variable.h">
+      <Filter>src\RPN\nodes\values</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operators\addition.h">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operators\all.h">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operators\division.h">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operators\exponentiation.h">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operators\factorial.h">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operators\modulo.h">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operators\multiplication.h">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operators\negation.h">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\operators\subtraction.h">
+      <Filter>src\RPN\nodes\operators</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\absolutevalue.h">
+      <Filter>src\RPN\nodes\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\all.h">
+      <Filter>src\RPN\nodes\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\maximum.h">
+      <Filter>src\RPN\nodes\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\minimum.h">
+      <Filter>src\RPN\nodes\functions</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\exponentials\all.h">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\exponentials\binarylogarithm.h">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\exponentials\decadiclogarithm.h">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\exponentials\exponential.h">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\exponentials\logarithm.h">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\exponentials\naturallogarithm.h">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\exponentials\power.h">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\exponentials\root.h">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\exponentials\squareroot.h">
+      <Filter>src\RPN\nodes\functions\exponentials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\all.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\arccosecant.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\arccosine.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\arccotangent.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\arcsecant.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\arcsine.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\arctangent.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\cosecant.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\cosine.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\cotangent.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\secant.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\sine.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\hyperbolics\tangent.h">
+      <Filter>src\RPN\nodes\functions\hyperbolics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\all.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\arccosecant.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\arccosine.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\arccotangent.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\arccotangent2.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\arcsecant.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\arcsine.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\arctangent.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\arctangent2.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\cosecant.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\cosine.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\cotangent.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\secant.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\sine.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RPN\nodes\functions\trigonometry\tangent.h">
+      <Filter>src\RPN\nodes\functions\trigonometry</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

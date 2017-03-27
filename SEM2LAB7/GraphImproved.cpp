@@ -11,11 +11,14 @@
 #define SQRT_ID 1007
 #define XSINX_ID 1008
 #define CUSTOM_ID 1009
-
+#define ID_COLOR_ACCEL 40005
+#define IDM_ABOUT 40007
 #define IDR_MENU 101
 #define IDR_CONTEXTMENU 106
 #define IDD_WIDTHDIALOG 108
+#define IDD_ABOUT 111
 #define ID_SETTINGS_GRAPHSETTINGS 40001
+#define ID_HACCEL 110
 #define ID_SETTINGS_SETCOLOR 40002
 #define IDD_GRAPHDIALOG 102
 #define IDB_GRAPHAPPLY 1003
@@ -31,10 +34,7 @@
 #include  <math.h>
 #include <cmath>
 #include <string>
-#include <limits>
-#include "Notation.h"
 #include <Commctrl.h>
-
 using namespace std;
 
 template <typename T> int sgn(T val) {
@@ -50,7 +50,7 @@ static int globalGraphWidth = 1;
 static COLORREF globalGraphColor;
 static DrawAreaInfo dAInfo;
 static int funcID;
-
+static HWND hwndGlobal;
 
 struct Graph
 {
@@ -62,17 +62,17 @@ bool isNumber(char* str, int len);
 BOOL InitApplication(HINSTANCE hinstance);
 BOOL InitInstance(HINSTANCE hinstance, int nCmdShow);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-DrawAreaInfo GetAreaInfo(int x, int y, int a, int b, int ID);
+DrawAreaInfo GetAreaInfo(double x, double y, int a, int b, int ID);
 void Draw(HDC& hdc, int x, int y, int funcID);
 POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld);
 double GetDistance(int x1, int y1, int x2, int y2);
 double CALLFUNC(int id, double x);
-double GetFuncMax(int ID);
-double GetFuncMin(int ID);
+pair<double, double> GetFuncMinMax(int ID);
 
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE prevHinstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	MSG msg;
+	
 
 	if (!InitApplication(hinstance))
 	{
@@ -86,8 +86,10 @@ int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE prevHinstance, LPSTR lpCmdLine
 		return FALSE;
 	}
 
+	HACCEL haccel = LoadAccelerators(hinstance, MAKEINTRESOURCE(ID_HACCEL));
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
+		TranslateAccelerator(hwndGlobal, haccel, &msg);
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
@@ -142,6 +144,24 @@ BOOL CALLBACK WidthBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 	return FALSE;
 }
 
+BOOL CALLBACK AboutHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+{
+	switch(message)
+	{
+	case WM_INITDIALOG:
+		break;
+	case WM_COMMAND:
+		switch(LOWORD(wparam))
+		{
+		case IDCANCEL:
+			EndDialog(hwnd, 0);
+			break;
+		}
+		break;
+	}
+	return FALSE;
+}
+
 BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	string text;
@@ -163,6 +183,7 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 		switch (LOWORD(wparam))
 		{
 		case IDB_GRAPHAPPLY:
+		{
 			if (tempFrontiers.first >= tempFrontiers.second || tempFrontiers.first >= dAInfo.b) EndDialog(hwnd, 0);
 			if (tempFrontiers.first != MAXINT32)
 				dAInfo.a = tempFrontiers.first;
@@ -171,7 +192,8 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 
 			InvalidateRect(GetParent(hwnd), NULL, true);
 			EndDialog(hwnd, 0);
-			break;
+		}
+		break;
 		case IDB_GRAPHCANCEL:
 			EndDialog(hwnd, 0);
 			break;
@@ -248,8 +270,6 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 			// to get text from text edit 
 			break;
 			// handle custom
-
-			break;
 		}
 	}
 	}
@@ -259,16 +279,13 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	static int x, y, a, b;
-	static HMENU popUp;
 
-	static HDC hdc, buffer;
+	static HDC hdc;
 	RECT client;
 
 	PAINTSTRUCT ps;
-
-	RECT clientRect;
 	static Graph gr;
-	stack<double> p;
+	
 	switch (message)
 	{
 	case WM_CREATE:
@@ -288,8 +305,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 	case WM_COMMAND:
 	{
-		switch (wparam)
+		switch (LOWORD(wparam))
 		{
+		case IDM_ABOUT:
+			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutHandler);
+			break;
 		case ID_WIDTH:
 			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_WIDTHDIALOG), hwnd, WidthBoxHandler);
 			break;
@@ -400,8 +420,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 }
 BOOL InitInstance(HINSTANCE hinstance, int nCmdShow)
 {
-	HWND hwnd;
-	hwnd = CreateWindow(
+	hwndGlobal = CreateWindow(
 		"Graph",
 		"Graph",
 		WS_OVERLAPPEDWINDOW,
@@ -415,10 +434,10 @@ BOOL InitInstance(HINSTANCE hinstance, int nCmdShow)
 		NULL);
 
 
-	if (!hwnd)
+	if (!hwndGlobal)
 		return FALSE;
-	ShowWindow(hwnd, nCmdShow);
-	UpdateWindow(hwnd);
+	ShowWindow(hwndGlobal, nCmdShow);
+	UpdateWindow(hwndGlobal);
 	return TRUE;
 }
 POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld)
@@ -430,16 +449,15 @@ POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld)
 	return pt;
 }
 
-DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb, int ID)
+DrawAreaInfo GetAreaInfo(double x, double y, int aa, int bb, int ID)
 {
 	if (!x || !y) return DrawAreaInfo();
-	DrawAreaInfo di;
 
 	dAInfo.a = aa; dAInfo.b = bb;
-	int xPoints, yPoints, divValueX, divValueY, a, b, factorX = 1, factorY = 1; // Кол-во делений
+	int xPoints, yPoints, divValueX, divValueY, factorX = 1, factorY = 1; // Кол-во делений
 
 	if (sgn(aa) != sgn(bb))
-		xPoints = abs(bb - aa);
+		xPoints = abs(bb - aa) + 2;
 	else
 		xPoints = (abs(bb) > abs(aa)) ? bb + 3 : aa + 3;
 
@@ -452,7 +470,9 @@ DrawAreaInfo GetAreaInfo(int x, int y, int aa, int bb, int ID)
 	}
 
 	dAInfo.divValueX = divValueX;
-	double min = ceil(abs(GetFuncMin(ID))), max = ceil(abs(GetFuncMax(ID)));
+
+	pair <double, double> minMax = GetFuncMinMax(ID);
+	double min = ceil(abs(minMax.first)), max = ceil(abs(minMax.second));
 
 	if (max != MAXINT32 && min != MININT32)
 		yPoints = (max > min) ? max : min;//max;
@@ -539,7 +559,6 @@ double GetDistance(int x1, int y1, int x2, int y2)
 
 double CALLFUNC(int id, double x)
 {
-	double val;
 	switch (id)
 	{
 	case EXP_ID:
@@ -556,31 +575,25 @@ double CALLFUNC(int id, double x)
 	}
 }
 
-double GetFuncMax(int ID)
+pair<double, double> GetFuncMinMax(int ID)
 {
-	double max = MININT32;
-	double fx = 0;
+	pair<double, double> toReturn;
+	toReturn.second = MININT32;
+	toReturn.first = MAXINT32; 
+	double fx;
+
 	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
 	{
 		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
-		if (fx > max) max = fx;
-		if (fx >= 0.95 * MAXINT32) return MAXINT32;
+		if (fx > toReturn.second) toReturn.second = fx;
+		if (fx >= 0.95 * MAXINT32) { toReturn.second = MAXINT32; return toReturn; }
+
+		if (fx < toReturn.first) toReturn.first = fx;
+		if (fx <= MININT32) { toReturn.first = MININT32; return toReturn; }
 	}
-	return max;
+	return toReturn;
 }
 
-double GetFuncMin(int ID)
-{
-	double min = MAXINT32;
-	double fx = 0;
-	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
-	{
-		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
-		if (fx < min) min = fx;
-		if (fx <= MININT32) return MININT32;
-	}
-	return min;
-}
 bool isNumber(char* str, int len)
 {
 	if (len > 0)
