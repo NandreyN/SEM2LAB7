@@ -29,6 +29,8 @@
 #define ID_WIDTHSLIDER 1011
 #define ID_EXIT 1020
 #define ID_WIDTH 1021
+
+#pragma comment(lib,"RPN.lib") 
 #include <windows.h>
 #include  <math.h>
 #include <cmath>
@@ -183,7 +185,7 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 		{
 		case IDB_GRAPHAPPLY:
 		{
-			if (tempFrontiers.first >= tempFrontiers.second || tempFrontiers.first >= dAInfo.b) EndDialog(hwnd, 0);
+			//if (tempFrontiers.first == tempFrontiers.second) { EndDialog(hwnd, 0); return FALSE; };
 			if (tempFrontiers.first != MAXINT32)
 				dAInfo.a = tempFrontiers.first;
 			if (tempFrontiers.second != MAXINT32)
@@ -474,9 +476,11 @@ DrawAreaInfo GetAreaInfo(double x, double y, int aa, int bb, int ID)
 	pair <double, double> minMax = GetFuncMinMax(ID);
 	double min = ceil(abs(minMax.first)), max = ceil(abs(minMax.second));
 
-	if (max != MAXINT32 && min != MININT32)
+	if (max != MAXINT32 && abs(min) <= MAXINT32 -2)
 		yPoints = (max > min) ? max : min;//max;
 	else
+		yPoints = xPoints * 2;
+	if (max == min)
 		yPoints = xPoints * 2;
 
 	divValueY = y / (yPoints * 2);
@@ -508,7 +512,7 @@ void Draw(HDC& hdc, int x, int y, int ID)
 	DeleteObject(newPen);
 	SelectObject(hdc, oldPen);
 
-	for (int xx = 0; xx <= dAInfo.newX; xx += dAInfo.divValueX)
+	for (int xx = 0; xx <= dAInfo.newX; xx += dAInfo.divValueX * dAInfo.factorX / dAInfo.factorX)
 	{
 		MoveToEx(hdc, xx, 5, NULL);
 		LineTo(hdc, xx, -5);
@@ -516,7 +520,7 @@ void Draw(HDC& hdc, int x, int y, int ID)
 		LineTo(hdc, -xx, -5);
 	}
 
-	for (int yy = 0; yy <= dAInfo.newY; yy += dAInfo.divValueY)
+	for (int yy = 0; yy <= dAInfo.newY; yy += dAInfo.divValueY * dAInfo.factorY / dAInfo.factorY)
 	{
 		MoveToEx(hdc, 5, yy, NULL);
 		LineTo(hdc, -5, yy);
@@ -532,12 +536,12 @@ void Draw(HDC& hdc, int x, int y, int ID)
 
 	newPen = CreatePen(PS_SOLID, globalGraphWidth, globalGraphColor);
 	oldPen = (HPEN)SelectObject(hdc, newPen);
-	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
+	for (double xArg = dAInfo.a * dAInfo.divValueX / dAInfo.factorX; xArg <= dAInfo.b * dAInfo.divValueX / dAInfo.factorX; xArg += 0.05)
 	{
 		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
 		if (fx == fx)
 			//LineTo(hdc, xArg, fx * dAInfo.divValueY);
-			Ellipse(hdc, xArg - globalGraphWidth, fx * dAInfo.divValueY - globalGraphWidth, xArg + globalGraphWidth, fx * dAInfo.divValueY + globalGraphWidth);
+			Ellipse(hdc, xArg - globalGraphWidth, fx * dAInfo.divValueY / dAInfo.factorY - globalGraphWidth, xArg + globalGraphWidth, fx * dAInfo.divValueY / dAInfo.factorY + globalGraphWidth);
 		//SetPixel(hdc, xArg, fx * dAInfo.divValueY, RGB(0, 0, 0));
 	}
 	SelectObject(hdc, oldPen);
@@ -545,11 +549,11 @@ void Draw(HDC& hdc, int x, int y, int ID)
 
 	newPen = CreatePen(PS_DOT, 1, BLACK_PEN);
 	oldPen = (HPEN)SelectObject(hdc, newPen);
-	MoveToEx(hdc, dAInfo.a * dAInfo.divValueX, dAInfo.newY, NULL);
-	LineTo(hdc, dAInfo.a * dAInfo.divValueX, -dAInfo.newY);
+	MoveToEx(hdc, dAInfo.a * dAInfo.divValueX / dAInfo.factorX, dAInfo.newY, NULL);
+	LineTo(hdc, dAInfo.a * dAInfo.divValueX / dAInfo.factorX, -dAInfo.newY);
 
-	MoveToEx(hdc, dAInfo.b * dAInfo.divValueX, dAInfo.newY, NULL);
-	LineTo(hdc, dAInfo.b * dAInfo.divValueX, -dAInfo.newY);
+	MoveToEx(hdc, dAInfo.b * dAInfo.divValueX / dAInfo.factorX, dAInfo.newY, NULL);
+	LineTo(hdc, dAInfo.b * dAInfo.divValueX / dAInfo.factorX, -dAInfo.newY);
 	SelectObject(hdc, oldPen);
 	DeleteObject(newPen);
 }
@@ -579,19 +583,21 @@ double CALLFUNC(int id, double x)
 pair<double, double> GetFuncMinMax(int ID)
 {
 	pair<double, double> toReturn;
-	toReturn.second = MININT32;
-	toReturn.first = MAXINT32;
+	toReturn.second = CALLFUNC(ID, dAInfo.b);
+	toReturn.first = CALLFUNC(ID, dAInfo.a);
 	double fx;
 
 	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
 	{
 		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
 		if (fx > toReturn.second) toReturn.second = fx;
-		if (fx >= 0.95 * MAXINT32) { toReturn.second = MAXINT32; return toReturn; }
+		if (fx > CALLFUNC(ID, dAInfo.b)) { toReturn.second = MAXINT32; return toReturn; }
 
 		if (fx < toReturn.first) toReturn.first = fx;
-		if (fx <= MININT32) { toReturn.first = MININT32; return toReturn; }
+		if (fx < CALLFUNC(ID, dAInfo.a)) { toReturn.first = MININT32; return toReturn; }
 	}
+	if (toReturn.first != toReturn.first || isinf(toReturn.first)) toReturn.first = 0.0;
+	if (toReturn.second != toReturn.second || isinf(toReturn.second)) toReturn.second = 0.0;
 	return toReturn;
 }
 
