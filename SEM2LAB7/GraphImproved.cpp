@@ -376,18 +376,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		int cy = HIWORD(lparam);
 		POINT clickedCoord = ConvertCoordinates(cx, cy, x, y);
 
-		double fx = CALLFUNC(funcID, (double)clickedCoord.x / di.divValueX);
+		double fx = CALLFUNC(funcID, (double)clickedCoord.x / di.divValueX * di.factorX);
 
 		double distance = abs(fx - ((double)clickedCoord.y) / di.divValueY * di.factorY);
-		if (distance <= di.factorY)
-		{
-			string text;
-			double t = (double)clickedCoord.x / di.divValueX;
-			text += "X: " + to_string(t); text += ", Y : " + to_string(fx);
-			hdc = GetDC(hwnd);
-			TextOut(hdc, 0, 0.9*y, text.c_str(), text.size());
-			ReleaseDC(hwnd, hdc);
-		}
+
+		string text;
+		double t = (double)clickedCoord.x / di.divValueX * di.factorX;
+		text += "X: " + to_string(t); text += ", Y : " + to_string(fx);
+		hdc = GetDC(hwnd);
+		TextOut(hdc, 0, 0.9*y, text.c_str(), text.size());
+		ReleaseDC(hwnd, hdc);
+
 		break;
 	}
 	case WM_RBUTTONUP:
@@ -479,10 +478,7 @@ DrawAreaInfo GetAreaInfo(double x, double y, int ID)
 	pair <double, double> minMax = GetFuncMinMax(ID);
 	double min = ceil(abs(minMax.first)), max = ceil(abs(minMax.second));
 
-	if (max != MAXINT32 && abs(min) <= MAXINT32 - 2)
-		yPoints = (max > min) ? max : min;//max;
-	else
-		yPoints = xPoints * 2;
+	yPoints = (max > min) ? max : min;//max;
 	if (max == min)
 		yPoints = xPoints * 2;
 
@@ -539,12 +535,12 @@ void Draw(HDC& hdc, int x, int y, int ID)
 
 	newPen = CreatePen(PS_SOLID, globalGraphWidth, globalGraphColor);
 	oldPen = (HPEN)SelectObject(hdc, newPen);
-	for (double xArg = dAInfo.a * dAInfo.divValueX / dAInfo.factorX; xArg <= dAInfo.b * dAInfo.divValueX / dAInfo.factorX; xArg += 0.05)
+	for (double xArg = dAInfo.a * dAInfo.divValueX ; xArg <= dAInfo.b * dAInfo.divValueX ; xArg += 0.05)
 	{
 		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
 		if (fx == fx)
 			//LineTo(hdc, xArg, fx * dAInfo.divValueY);
-			Ellipse(hdc, xArg - globalGraphWidth, fx * dAInfo.divValueY / dAInfo.factorY - globalGraphWidth, xArg + globalGraphWidth, fx * dAInfo.divValueY / dAInfo.factorY + globalGraphWidth);
+			Ellipse(hdc, xArg / dAInfo.factorX - globalGraphWidth, fx * dAInfo.divValueY / dAInfo.factorY - globalGraphWidth, xArg / dAInfo.factorX + globalGraphWidth, fx * dAInfo.divValueY / dAInfo.factorY + globalGraphWidth);
 		//SetPixel(hdc, xArg, fx * dAInfo.divValueY, RGB(0, 0, 0));
 	}
 	SelectObject(hdc, oldPen);
@@ -585,19 +581,22 @@ double CALLFUNC(int id, double x)
 
 pair<double, double> GetFuncMinMax(int ID)
 {
+	RECT clientArea;
+	GetClientRect(hwndGlobal, &clientArea);
+
 	pair<double, double> toReturn;
-	toReturn.second = CALLFUNC(ID, dAInfo.b);
-	toReturn.first = CALLFUNC(ID, dAInfo.a);
+	toReturn.second = 0;//CALLFUNC(ID, dAInfo.b);
+	toReturn.first = 0;//CALLFUNC(ID, dAInfo.a);
 	double fx;
 
 	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
 	{
 		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
 		if (fx > toReturn.second) toReturn.second = fx;
-		if (fx > CALLFUNC(ID, dAInfo.b)) { toReturn.second = MAXINT32; return toReturn; }
+		if (fx > clientArea.bottom / 2) { return toReturn; }
 
 		if (fx < toReturn.first) toReturn.first = fx;
-		if (fx < CALLFUNC(ID, dAInfo.a)) { toReturn.first = MININT32; return toReturn; }
+		if (fx < -clientArea.bottom / 2) { return toReturn; }
 	}
 	if (toReturn.first != toReturn.first || isinf(toReturn.first)) toReturn.first = 0.0;
 	if (toReturn.second != toReturn.second || isinf(toReturn.second)) toReturn.second = 0.0;
