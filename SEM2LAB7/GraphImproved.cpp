@@ -63,7 +63,7 @@ bool isNumber(char* str, int len);
 BOOL InitApplication(HINSTANCE hinstance);
 BOOL InitInstance(HINSTANCE hinstance, int nCmdShow);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
-DrawAreaInfo GetAreaInfo(double x, double y, int a, int b, int ID);
+DrawAreaInfo GetAreaInfo(double x, double y, int ID);
 void Draw(HDC& hdc, int x, int y, int funcID);
 POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld);
 double GetDistance(int x1, int y1, int x2, int y2);
@@ -186,6 +186,9 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 		case IDB_GRAPHAPPLY:
 		{
 			//if (tempFrontiers.first == tempFrontiers.second) { EndDialog(hwnd, 0); return FALSE; };
+			if (tempFrontiers.first <= -50 || tempFrontiers.second >= 50)
+				EndDialog(hwnd, 0);
+
 			if (tempFrontiers.first != MAXINT32)
 				dAInfo.a = tempFrontiers.first;
 			if (tempFrontiers.second != MAXINT32)
@@ -301,7 +304,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		GetClientRect(hwnd, &client);
 		x = client.right;
 		y = client.bottom;
-		GetAreaInfo(x, y, dAInfo.a, dAInfo.b, funcID);
+		GetAreaInfo(x, y, funcID);
 		break;
 
 	case WM_COMMAND:
@@ -348,7 +351,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	}
 	case WM_PAINT:
 	{
-		GetAreaInfo(x, y, dAInfo.a, dAInfo.b, funcID);
+		GetAreaInfo(x, y, funcID);
 		RECT Rect;
 
 		string text = "Scale X : " + to_string(dAInfo.factorX) + " , Y : " + to_string(dAInfo.factorY);
@@ -368,21 +371,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 	case WM_LBUTTONDOWN:
 	{
-		DrawAreaInfo di = GetAreaInfo(x, y, a, b, funcID);
+		DrawAreaInfo di = GetAreaInfo(x, y, funcID);
 		int cx = LOWORD(lparam);
 		int cy = HIWORD(lparam);
 		POINT clickedCoord = ConvertCoordinates(cx, cy, x, y);
 
 		double fx = CALLFUNC(funcID, (double)clickedCoord.x / di.divValueX);
 
-		double distance = abs(fx - ((double)clickedCoord.y) / di.divValueY);
-		if (distance <= 0.3)
+		double distance = abs(fx - ((double)clickedCoord.y) / di.divValueY * di.factorY);
+		if (distance <= di.factorY)
 		{
 			string text;
 			double t = (double)clickedCoord.x / di.divValueX;
 			text += "X: " + to_string(t); text += ", Y : " + to_string(fx);
 			hdc = GetDC(hwnd);
-			TextOut(hdc, 0, 0, text.c_str(), text.size());
+			TextOut(hdc, 0, 0.9*y, text.c_str(), text.size());
 			ReleaseDC(hwnd, hdc);
 		}
 		break;
@@ -450,17 +453,17 @@ POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld)
 	return pt;
 }
 
-DrawAreaInfo GetAreaInfo(double x, double y, int aa, int bb, int ID)
+DrawAreaInfo GetAreaInfo(double x, double y, int ID)
 {
 	if (!x || !y) return DrawAreaInfo();
 
-	dAInfo.a = aa; dAInfo.b = bb;
+	//dAInfo.a = aa; dAInfo.b = bb;
 	int xPoints, yPoints, divValueX, divValueY, factorX = 1, factorY = 1; // Кол-во делений
 
-	if (sgn(aa) != sgn(bb))
-		xPoints = abs(bb - aa) + 2;
+	if (sgn(dAInfo.a) != sgn(dAInfo.b))
+		xPoints = abs(dAInfo.b - dAInfo.a) + 2;
 	else
-		xPoints = (abs(bb) > abs(aa)) ? bb + 3 : aa + 3;
+		xPoints = (abs(dAInfo.b) > abs(dAInfo.a)) ? dAInfo.b + 3 : dAInfo.a + 3;
 
 	if (dAInfo.a > dAInfo.b) swap(dAInfo.a, dAInfo.b);
 	divValueX = x / (xPoints * 2);
@@ -476,7 +479,7 @@ DrawAreaInfo GetAreaInfo(double x, double y, int aa, int bb, int ID)
 	pair <double, double> minMax = GetFuncMinMax(ID);
 	double min = ceil(abs(minMax.first)), max = ceil(abs(minMax.second));
 
-	if (max != MAXINT32 && abs(min) <= MAXINT32 -2)
+	if (max != MAXINT32 && abs(min) <= MAXINT32 - 2)
 		yPoints = (max > min) ? max : min;//max;
 	else
 		yPoints = xPoints * 2;
