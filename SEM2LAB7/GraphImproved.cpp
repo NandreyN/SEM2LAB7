@@ -69,6 +69,7 @@ POINT ConvertCoordinates(int x, int y, int widthOld, int heightOld);
 double GetDistance(int x1, int y1, int x2, int y2);
 double CALLFUNC(int id, double x);
 pair<double, double> GetFuncMinMax(int ID);
+void HandleLButtonClick(HDC &hdc, int x, int y, int clickX, int clickY);
 
 int WINAPI WinMain(HINSTANCE hinstance, HINSTANCE prevHinstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -283,6 +284,7 @@ BOOL CALLBACK GraphBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lpa
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 {
 	static int x, y, a, b;
+	static POINT lastClickedPoint;
 
 	static HDC hdc;
 	RECT client;
@@ -299,7 +301,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		a = -5; b = 5;
 		dAInfo.a = a;
 		dAInfo.b = b;
-
+		lastClickedPoint.x = 0;
+		lastClickedPoint.y = 0;
 	case WM_SIZE:
 		GetClientRect(hwnd, &client);
 		x = client.right;
@@ -351,6 +354,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	}
 	case WM_PAINT:
 	{
+		if (x == 0 || y == 0) return TRUE;
 		GetAreaInfo(x, y, funcID);
 		RECT Rect;
 
@@ -365,28 +369,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		SetRect(&Rect, -x / 2, y / 2, -x / 2 + 0.3*x, y / 2 - 0.1*y);
 		Draw(hdc, x, y, funcID);
 		DrawText(hdc, text.data(), text.size(), &Rect, DT_SINGLELINE | DT_LEFT);
+		HandleLButtonClick(hdc, x, y, lastClickedPoint.x, lastClickedPoint.y);
 		EndPaint(hwnd, &ps);
 		break;
 	}
 
 	case WM_LBUTTONDOWN:
 	{
-		DrawAreaInfo di = GetAreaInfo(x, y, funcID);
-		int cx = LOWORD(lparam);
-		int cy = HIWORD(lparam);
-		POINT clickedCoord = ConvertCoordinates(cx, cy, x, y);
+		lastClickedPoint.x = LOWORD(lparam);
+		lastClickedPoint.y = HIWORD(lparam);
 
-		double fx = CALLFUNC(funcID, (double)clickedCoord.x / di.divValueX * di.factorX);
-
-		double distance = abs(fx - ((double)clickedCoord.y) / di.divValueY * di.factorY);
-
-		string text;
-		double t = (double)clickedCoord.x / di.divValueX * di.factorX;
-		text += "X: " + to_string(t); text += ", Y : " + to_string(fx);
-		hdc = GetDC(hwnd);
-		TextOut(hdc, 0, 0.9*y, text.c_str(), text.size());
-		ReleaseDC(hwnd, hdc);
-
+		HandleLButtonClick(hdc, x, y, lastClickedPoint.x, lastClickedPoint.y);
 		break;
 	}
 	case WM_RBUTTONUP:
@@ -535,7 +528,7 @@ void Draw(HDC& hdc, int x, int y, int ID)
 
 	newPen = CreatePen(PS_SOLID, globalGraphWidth, globalGraphColor);
 	oldPen = (HPEN)SelectObject(hdc, newPen);
-	for (double xArg = dAInfo.a * dAInfo.divValueX ; xArg <= dAInfo.b * dAInfo.divValueX ; xArg += 0.05)
+	for (double xArg = dAInfo.a * dAInfo.divValueX; xArg <= dAInfo.b * dAInfo.divValueX; xArg += 0.05)
 	{
 		fx = CALLFUNC(ID, xArg / dAInfo.divValueX);
 		if (fx == fx)
@@ -601,6 +594,28 @@ pair<double, double> GetFuncMinMax(int ID)
 	if (toReturn.first != toReturn.first || isinf(toReturn.first)) toReturn.first = 0.0;
 	if (toReturn.second != toReturn.second || isinf(toReturn.second)) toReturn.second = 0.0;
 	return toReturn;
+}
+
+void HandleLButtonClick(HDC &hdc, int x, int y, int clickX, int clickY)
+{
+	static RECT textoutRect;
+
+	int cx = clickX;
+	int cy = clickY;
+	POINT clickedCoord = ConvertCoordinates(cx, cy, x, y);
+
+	double fx = CALLFUNC(funcID, (double)clickedCoord.x / dAInfo.divValueX * dAInfo.factorX);
+
+	double distance = abs(fx - ((double)clickedCoord.y) / dAInfo.divValueY * dAInfo.factorY);
+
+	string text;
+	double t = (double)clickedCoord.x / dAInfo.divValueX * dAInfo.factorX;
+	text += "X: " + to_string(t); text += ", Y : " + to_string(fx);
+	hdc = GetDC(hwndGlobal);
+	FillRect(hdc, &textoutRect, WHITE_BRUSH);
+	SetRect(&textoutRect, 0, 0.9*y, 0.3*x, y);
+	DrawText(hdc, text.data(), text.size(), &textoutRect, DT_SINGLELINE | DT_LEFT);
+	ReleaseDC(hwndGlobal, hdc);
 }
 
 bool isNumber(char* str, int len)
