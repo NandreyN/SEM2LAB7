@@ -4,7 +4,7 @@
 #define LN(x) log(x)
 #define SQRT(x) sqrt(x)
 #define XSINX(x) (double)x*sin(x)
-#define CUSTOM(x) (double)x*x
+#define CUSTOM(x) (double)x*x*x - 9*x
 
 #define EXP_ID 1005
 #define LN_ID 1006
@@ -17,9 +17,11 @@
 #define IDR_CONTEXTMENU 106
 #define IDD_WIDTHDIALOG 108
 #define IDD_ABOUT 112
+#define IDD_EXIT 114
 #define ID_SETTINGS_GRAPHSETTINGS 40001
 #define ID_HACCEL 111
 #define ID_SETTINGS_SETCOLOR 40002
+#define IDMB_FILE_EXIT 40013
 #define IDD_GRAPHDIALOG 102
 #define IDB_GRAPHAPPLY 1003
 #define IDB_GRAPHCANCEL 1004
@@ -120,6 +122,28 @@ BOOL InitApplication(HINSTANCE hinstance)
 		return FALSE;
 	}
 	return TRUE;
+}
+
+BOOL CALLBACK ExitHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+{
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		break;
+	case WM_COMMAND:
+		switch (LOWORD(wparam))
+		{
+		case IDOK:
+			SendMessage(GetParent(hwnd), WM_CLOSE, 0, 0);
+			EndDialog(hwnd, 0);
+			break;
+		case IDCANCEL:
+			EndDialog(hwnd, 0);
+			break;
+		}
+		break;
+	}
+	return FALSE;
 }
 
 BOOL CALLBACK WidthBoxHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
@@ -320,15 +344,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		case ID_WIDTH:
 			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_WIDTHDIALOG), hwnd, WidthBoxHandler);
 			break;
-		case ID_EXIT:
-			int res; res = MessageBox(NULL, "Do you really want to exit?", "Message", MB_OKCANCEL);
-			switch (res)
-			{
-			case IDOK:
-				SendMessage(hwnd, WM_CLOSE, NULL, NULL);
-			default:
-				break;
-			}
+		case IDMB_FILE_EXIT:
+			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_EXIT), hwnd, ExitHandler);
 			break;
 		case ID_SETTINGS_GRAPHSETTINGS:
 			DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_GRAPHDIALOG), hwnd, GraphBoxHandler);
@@ -341,7 +358,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 			ccs.rgbResult = RGB(255, 255, 255);
 			ccs.Flags = CC_RGBINIT | CC_FULLOPEN;
 			ccs.lpCustColors = (LPDWORD)acrCustClr;
-
+			ccs.rgbResult = globalGraphColor;
 			if (ChooseColor(&ccs))
 			{
 				globalGraphColor = ccs.rgbResult;
@@ -358,6 +375,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		GetAreaInfo(x, y, funcID);
 		RECT Rect;
 
+		HandleLButtonClick(hdc, x, y, lastClickedPoint.x, lastClickedPoint.y);
 		string text = "Scale X : " + to_string(dAInfo.factorX) + " , Y : " + to_string(dAInfo.factorY);
 
 		hdc = BeginPaint(hwnd, &ps);
@@ -368,6 +386,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 
 		SetRect(&Rect, -x / 2, y / 2, -x / 2 + 0.3*x, y / 2 - 0.1*y);
 		Draw(hdc, x, y, funcID);
+		SetBkMode(hdc, TRANSPARENT);
 		DrawText(hdc, text.data(), text.size(), &Rect, DT_SINGLELINE | DT_LEFT);
 		HandleLButtonClick(hdc, x, y, lastClickedPoint.x, lastClickedPoint.y);
 		EndPaint(hwnd, &ps);
@@ -378,7 +397,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 	{
 		lastClickedPoint.x = LOWORD(lparam);
 		lastClickedPoint.y = HIWORD(lparam);
-
 		HandleLButtonClick(hdc, x, y, lastClickedPoint.x, lastClickedPoint.y);
 		break;
 	}
@@ -386,14 +404,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
 		POINT pt;
 		pt.x = LOWORD(lparam);
 		pt.y = HIWORD(lparam);
-		ClientToScreen(hwnd, &pt);
-
+		
+		//ConvertCoordinates()
 		HMENU hMenu; hMenu = CreatePopupMenu();
 
-		AppendMenu(hMenu, MFT_STRING, ID_WIDTH, "&Width");
-		AppendMenu(hMenu, MFT_SEPARATOR, 0, NULL);
-		AppendMenu(hMenu, MFT_STRING, ID_EXIT, "&Exit");
+		int r; r = abs(dAInfo.xPoints - abs(dAInfo.a))* dAInfo.divValueX / dAInfo.factorX;
+		int k; k = r + abs(dAInfo.b - dAInfo.a)* dAInfo.divValueX / dAInfo.factorX;
+		if (pt.x / dAInfo.factorX >= r && pt.x <= k)
+		{
+			AppendMenu(hMenu, MFT_STRING, ID_WIDTH, "&Width");
+		}
 
+		ClientToScreen(hwnd, &pt);
 		TrackPopupMenu(hMenu, TPM_RIGHTBUTTON |
 			TPM_TOPALIGN |
 			TPM_LEFTALIGN,
@@ -613,7 +635,7 @@ void HandleLButtonClick(HDC &hdc, int x, int y, int clickX, int clickY)
 	text += "X: " + to_string(t); text += ", Y : " + to_string(fx);
 	hdc = GetDC(hwndGlobal);
 	FillRect(hdc, &textoutRect, WHITE_BRUSH);
-	SetRect(&textoutRect, 0, 0.9*y, 0.3*x, y);
+	SetRect(&textoutRect, 0, 0.95*y, 0.2*x, y);
 	DrawText(hdc, text.data(), text.size(), &textoutRect, DT_SINGLELINE | DT_LEFT);
 	ReleaseDC(hwndGlobal, hdc);
 }
